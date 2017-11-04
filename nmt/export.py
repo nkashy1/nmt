@@ -26,13 +26,14 @@ def export(ckpt, hparams, export_dir):
 
   infer_model = model_helper.create_infer_model(model_creator, hparams)
 
-  builder = tf.saved_model_builder.SavedModelBuilder(export_dir)
+  builder = tf.saved_model.builder.SavedModelBuilder(export_dir)
 
   with tf.Session(graph=infer_model.graph) as sess:
     loaded_infer_model = model_helper.load_model(
       infer_model.model,
       ckpt,
-      sess
+      sess,
+      "infer"
     )
 
     tags = [tf.saved_model.tag_constants.SERVING]
