@@ -25,6 +25,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 
+from . import export
 from . import inference
 from . import train
 from .utils import evaluation_utils
@@ -257,6 +258,13 @@ def add_arguments(parser):
                       help="Task id of the worker.")
   parser.add_argument("--num_workers", type=int, default=1,
                       help="Number of workers (inference only).")
+
+  # Export
+  parser.add_argument(
+    "--export",
+    nargs='?',
+    help="Export a trained checkpoint as a SavedModel")
+  parser.add_argument("--export_dir", help="Path under which to store export")
 
 
 def create_hparams(flags):
@@ -492,7 +500,10 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
   hparams = create_or_load_hparams(
       out_dir, default_hparams, flags.hparams_path, save_hparams=(jobid==0))
 
-  if flags.inference_input_file:
+  if flags.export:
+    # Requires --export, --export_dir, --out_dir, --ckpt
+    export.export(flags.ckpt, hparams, flags.export_dir)
+  elif flags.inference_input_file:
     # Inference indices
     hparams.inference_indices = None
     if flags.inference_list:
